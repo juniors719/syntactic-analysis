@@ -7,8 +7,6 @@
 #include <vector>
 using namespace std;
 
-map<string, vector<vector<string>>> grammar;
-
 struct StateItem {
     string lhs;
     vector<string> rhs;
@@ -146,44 +144,4 @@ int build_LR0_automaton(const map<string, vector<vector<string>>>& grammar,
         }
     }
     return -1;
-}
-
-int main() {
-    grammar["S'"] = {{"S", "$"}};
-    grammar["S"] = {
-        {"(", "L", ")"},
-        {"x"}};
-    grammar["L"] = {
-        {"S"},
-        {"L", ",", "S"}};
-
-    vector<unordered_set<StateItem>> states;
-    map<pair<int, string>, int> transitions;
-
-    int last = build_LR0_automaton(grammar, "S", states, transitions);
-
-    cout << "Estados LR(0):\n";
-    for (size_t i = 0; i < states.size(); i++) {
-        cout << "Estado " << i << ":\n";
-        for (const auto& item : states[i]) {
-            cout << "  " << item.lhs << " -> ";
-            for (size_t j = 0; j < item.rhs.size(); j++) {
-                if (j == item.dot) cout << ". ";
-                cout << item.rhs[j] << " ";
-            }
-            if (item.dot == item.rhs.size()) cout << ". ";
-            cout << "\n";
-        }
-        cout << "\n";
-    }
-
-    cout << "Transições:\n";
-    for (const auto& trans : transitions) {
-        cout << "δ(" << trans.first.first << ", " << trans.first.second
-             << ") = " << trans.second << "\n";
-    }
-
-    cout << "Estado de aceitação: " << last << "\n";
-
-    return 0;
 }
