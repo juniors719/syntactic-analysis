@@ -9,7 +9,7 @@ vector<unordered_set<StateItem>> states;
 map<pair<int, string>, int> transitions;
 int final_state{};
 
-bool parse(const vector<string>& input_tokens, int final_state) {
+bool parse(const vector<string>& input_tokens, int final_state, string start_symbol) {
     stack<int> state_stack;
     stack<string> symbol_stack;
     state_stack.push(0);
@@ -46,7 +46,7 @@ bool parse(const vector<string>& input_tokens, int final_state) {
         bool reduced = false;
         for (const auto& item : states[current_state]) {
             if (item.dot == item.rhs.size()) {
-                if (item.lhs == "S'" && item.rhs.size() == 1 && item.rhs[0] == "S") {
+                if (item.lhs == start_symbol + "'" && item.rhs.size() == 1 && item.rhs[0] == start_symbol) {
                     return true;
                 }
 
@@ -81,7 +81,7 @@ bool parse(const vector<string>& input_tokens, int final_state) {
         }
     }
 
-    bool accepted = (state_stack.top() == final_state && symbol_stack.top() == "S'");
+    bool accepted = (state_stack.top() == final_state && symbol_stack.top() == start_symbol + "'");
     return accepted;
 }
 
@@ -117,7 +117,7 @@ int main() {
         {",", ",", ",", ","}};
 
     for (const auto& test_case : test_cases) {
-        cout << (parse(test_case, final_state) ? "Sucesso" : "Erro Sintático") << "\n";
+        cout << (parse(test_case, final_state, "S") ? "Sucesso" : "Erro Sintático") << "\n";
     }
 
     return 0;
