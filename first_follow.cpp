@@ -2,6 +2,9 @@
 #include <map>
 #include <set>
 #include <vector>
+
+#include "file_reader.hpp"
+
 using namespace std;
 
 map<string, set<string>> FIRST, FOLLOW;
@@ -25,7 +28,8 @@ bool allNullable(const vector<string>& symbols, map<string, bool>& nullable) {
 }
 
 /**
- * @brief Adiciona os símbolos de um conjunto a outro e verifica se houve mudança.
+ * @brief Adiciona os símbolos de um conjunto a outro e verifica se houve
+ * mudança.
  *
  * @param target Conjunto de destino.
  * @param source Conjunto de origem.
@@ -38,32 +42,21 @@ bool unionChanged(set<string>& target, const set<string>& source) {
 }
 
 int main() {
-    // Definição da gramática
-    // 1. S' -> S $
-    // 2. S -> ( L )
-    // 3. S -> x
-    // 4. L -> S
-    // 5. L -> L , S
-    grammar["S'"] = {{"S", "$"}};
-    grammar["S"] = {
-        {"(", "L", ")"},
-        {"x"}};
-    grammar["L"] = {
-        {"S"},
-        {"L", ",", "S"}};
+    inicial = load_grammar("grammar.txt", grammar);
 
-    inicial = "S'";
-
-    terminals = {"(", ")", ",", "x", "$"};
-
-    // Inicialização
+    // Coletar não-terminais
+    set<string> non_terminals;
     for (const auto& pair : grammar) {
-        const auto& lhs = pair.first;
-        const auto& prods = pair.second;
-        nullable[lhs] = false;
-        for (const auto& rhs : prods) {
+        non_terminals.insert(pair.first);
+        nullable[pair.first] = false;
+    }
+
+    // Identificar terminais e inicializar FIRST dos terminais
+    for (const auto& pair : grammar) {
+        const auto& productions = pair.second;
+        for (const auto& rhs : productions) {
             for (const string& symbol : rhs) {
-                if (!grammar.count(symbol)) {
+                if (non_terminals.find(symbol) == non_terminals.end()) {
                     terminals.insert(symbol);
                     FIRST[symbol].insert(symbol);
                 }
@@ -87,7 +80,9 @@ int main() {
                     changed = true;
                 }
                 for (size_t i = 0; i < rhs.size(); ++i) {
-                    if (allNullable(vector<string>(rhs.begin(), rhs.begin() + i), nullable)) {
+                    if (allNullable(
+                            vector<string>(rhs.begin(), rhs.begin() + i),
+                            nullable)) {
                         changed |= unionChanged(FIRST[lhs], FIRST[rhs[i]]);
                     }
                 }

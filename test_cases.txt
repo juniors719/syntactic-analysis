@@ -1,0 +1,17 @@
+# válidos
+x
+( x )
+( x , x )
+( x , x , x )
+( ( x ) )
+( x , ( x ) )
+
+# inválidos
+x x
+( x
+x )
+( , x )
+( x , )
+( x , , x )
+( )
+x ( , x )

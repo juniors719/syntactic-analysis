@@ -1,7 +1,12 @@
 #include <iostream>
 #include <stack>
+#include <map>
+#include <vector>
+#include <unordered_set>
 
 #include "automata.hpp"
+#include "file_reader.hpp"
+
 using namespace std;
 
 map<string, vector<vector<string>>> grammar;
@@ -9,7 +14,8 @@ vector<unordered_set<StateItem>> states;
 map<pair<int, string>, int> transitions;
 int final_state{};
 
-bool parse(const vector<string>& input_tokens, int final_state, string start_symbol) {
+// Função parse
+bool parse(const vector<string>& input_tokens, int final_state, const string& start_symbol) {
     stack<int> state_stack;
     stack<string> symbol_stack;
     state_stack.push(0);
@@ -21,14 +27,6 @@ bool parse(const vector<string>& input_tokens, int final_state, string start_sym
     while (index < tokens.size()) {
         int current_state = state_stack.top();
         string current_token = tokens[index];
-        stack<int> temp_states = state_stack;
-        while (!temp_states.empty()) {
-            temp_states.pop();
-        }
-        stack<string> temp_symbols = symbol_stack;
-        while (!temp_symbols.empty()) {
-            temp_symbols.pop();
-        }
 
         if (current_token == "$" && current_state == final_state) {
             return true;
@@ -51,7 +49,6 @@ bool parse(const vector<string>& input_tokens, int final_state, string start_sym
                 }
 
                 size_t reduce_count = item.rhs.size();
-
                 for (size_t i = 0; i < reduce_count; i++) {
                     if (state_stack.empty() || symbol_stack.empty()) {
                         return false;
@@ -81,40 +78,14 @@ bool parse(const vector<string>& input_tokens, int final_state, string start_sym
         }
     }
 
-    bool accepted = (state_stack.top() == final_state && symbol_stack.top() == start_symbol + "'");
-    return accepted;
+    return (state_stack.top() == final_state && symbol_stack.top() == start_symbol + "'");
 }
 
 int main() {
-    grammar["S'"] = {{"S", "$"}};
-    grammar["S"] = {
-        {"(", "L", ")"},
-        {"x"}};
-    grammar["L"] = {
-        {"S"},
-        {"L", ",", "S"}};
-
+    load_grammar("grammar.txt", grammar);
     final_state = build_LR0_automaton(grammar, "S", states, transitions);
 
-    vector<vector<string>> test_cases = {
-        // Válidos
-        {"x"},
-        {"(", "x", ")"},
-        {"(", "x", ",", "x", ")"},
-        {"(", "x", ",", "x", ",", "x", ")"},
-        {"(", "(", "x", ")", ")"},
-        {"(", "x", ",", "(", "x", ")", ")"},
-
-        // Inválidos
-        {"x", "x"},
-        {"(", "x"},
-        {"x", ")"},
-        {"(", ",", "x", ")"},
-        {"(", "x", ",", ")"},
-        {"(", "x", ",", ",", "x", ")"},
-        {"(", ")"},
-        {"x", "(", ",", "x", ")"},
-        {",", ",", ",", ","}};
+    auto test_cases = load_test_cases("test_cases.txt");
 
     for (const auto& test_case : test_cases) {
         cout << (parse(test_case, final_state, "S") ? "Sucesso" : "Erro Sintático") << "\n";
