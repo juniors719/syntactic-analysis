@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "file_reader.hpp"
+#include "globals.hpp"
 
 using namespace std;
 
 map<string, set<string>> FIRST, FOLLOW;
 map<string, bool> nullable;
-map<string, vector<vector<string>>> grammar;
 string inicial;
 set<string> terminals;
 
@@ -41,7 +41,7 @@ bool unionChanged(set<string>& target, const set<string>& source) {
     return target.size() != before;
 }
 
-int main() {
+void run_first_follow() {
     inicial = load_grammar("grammar.txt", grammar);
 
     // Coletar não-terminais
@@ -130,6 +130,4 @@ int main() {
         for (const string& s : followSet) cout << s << " ";
         cout << "}\n";
     }
-
-    return 0;
 }

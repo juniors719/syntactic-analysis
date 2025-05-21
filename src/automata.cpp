@@ -5,43 +5,12 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+#include "file_reader.hpp"
+#include "globals.hpp"
+#include "automata.hpp"
+
 using namespace std;
-
-map<string, vector<vector<string>>> grammar;
-
-struct StateItem {
-    string lhs;
-    vector<string> rhs;
-    size_t dot;
-
-    StateItem(string lhs, vector<string> rhs, size_t dot = 0)
-        : lhs(lhs), rhs(rhs), dot(dot) {}
-
-    bool operator<(const StateItem& other) const {
-        if (lhs != other.lhs) return lhs < other.lhs;
-        if (dot != other.dot) return dot < other.dot;
-        return rhs < other.rhs;
-    }
-
-    bool operator==(const StateItem& other) const {
-        return lhs == other.lhs && dot == other.dot && rhs == other.rhs;
-    }
-};
-
-namespace std {
-template <>
-struct hash<StateItem> {
-    size_t operator()(const StateItem& item) const {
-        size_t h1 = hash<string>()(item.lhs);
-        size_t h2 = item.rhs.size();
-        for (const string& s : item.rhs) {
-            h2 ^= hash<string>()(s) + 0x9e3779b9 + (h2 << 6) + (h2 >> 2);
-        }
-        size_t h3 = hash<size_t>()(item.dot);
-        return h1 ^ (h2 << 1) ^ (h3 << 2);
-    }
-};
-}  // namespace std
 
 unordered_set<StateItem> closure(const unordered_set<StateItem>& items, const map<string, vector<vector<string>>>& grammar) {
     unordered_set<StateItem> closure_set = items;
@@ -148,14 +117,8 @@ int build_LR0_automaton(const map<string, vector<vector<string>>>& grammar,
     return -1;
 }
 
-int main() {
-    grammar["S'"] = {{"S", "$"}};
-    grammar["S"] = {
-        {"(", "L", ")"},
-        {"x"}};
-    grammar["L"] = {
-        {"S"},
-        {"L", ",", "S"}};
+void run_automaton() {
+    load_grammar("grammar.txt", grammar);
 
     vector<unordered_set<StateItem>> states;
     map<pair<int, string>, int> transitions;
@@ -184,6 +147,4 @@ int main() {
     }
 
     cout << "Estado de aceitação: " << last << "\n";
-
-    return 0;
 }

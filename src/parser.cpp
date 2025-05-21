@@ -6,10 +6,11 @@
 
 #include "automata.hpp"
 #include "file_reader.hpp"
+#include "parser.hpp"
+#include "globals.hpp"
 
 using namespace std;
 
-map<string, vector<vector<string>>> grammar;
 vector<unordered_set<StateItem>> states;
 map<pair<int, string>, int> transitions;
 int final_state{};
@@ -81,7 +82,7 @@ bool parse(const vector<string>& input_tokens, int final_state, const string& st
     return (state_stack.top() == final_state && symbol_stack.top() == start_symbol + "'");
 }
 
-int main() {
+void run_parser() {
     load_grammar("grammar.txt", grammar);
     final_state = build_LR0_automaton(grammar, "S", states, transitions);
 
@@ -90,6 +91,4 @@ int main() {
     for (const auto& test_case : test_cases) {
         cout << (parse(test_case, final_state, "S") ? "Sucesso" : "Erro Sintático") << "\n";
     }
-
-    return 0;
 }

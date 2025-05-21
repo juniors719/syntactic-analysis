@@ -8,7 +8,7 @@ using namespace std;
 
 std::string load_grammar(const string& filename,
                          map<string, vector<vector<string>>>& grammar) {
-    ifstream file(filename);
+    ifstream file("data/" + filename);
     if (!file.is_open()) {
         cerr << "Erro ao abrir o arquivo de gramática: " << filename << endl;
         exit(1);
@@ -43,7 +43,7 @@ std::string load_grammar(const string& filename,
 }
 
 vector<vector<string>> load_test_cases(const string& filename) {
-    ifstream file(filename);
+    ifstream file("data/" + filename);
     if (!file.is_open()) {
         cerr << "Erro ao abrir o arquivo de casos de teste: " << filename
              << endl;
